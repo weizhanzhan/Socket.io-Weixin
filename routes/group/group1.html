@@ -43,18 +43,12 @@
   </head>
   <body>
     <div>
-        <div style="text-align:center">
-            <h1>机器人</h1>
+        <div >
+            <span style="font-size:20px">群聊:507一霸</span>
+            <span style="float:right" id="now_role"></span>
         </div>
+        
         <ul id="messages">
-            <li class="me">
-                <div class="mename">weizhan:</div>
-                <div class="content">Hello</div>
-            </li>
-            <li class="jqr">
-                <div class="name">机器人:</div>
-                <div class="content">你好</div>
-            </li>
         </ul>
         <form action="">
             <input id="m" autocomplete="off" /><button>Send</button>
@@ -63,36 +57,49 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+ //   var roles=""
+    var group_id=1
+    var roles=prompt("输入你的ID","");
+    $("#now_role").text('当前用户:'+roles)
     $(function () {
+        
         var myMsg=""
         var socket = io();
+        
         $('form').submit(function(){
-            socket.emit('chat message', $('#m').val());
-            myMsg=$('#m').val()
-            $('#messages').append(`
-                <li class="me">
-                    <div class="mename">weizhan:</div>
-                    <div class="content">${myMsg}</div>
-                </li>
-            `)
-            $('#m').val('');
+            if(roles==""){
+                alert("请选择角色")
+            }else{
+            socket.emit('group'+group_id, {id:roles,content:$('#m').val()});
+             $('#m').val('');
             return false;
+            }
         });
-        socket.on('chat message', function(msg){
-            $('#messages').append(`           
-                <li class="jqr">
-                    <div class="name">机器人:</div>
-                    <div class="content">${msg}</div>
+        socket.on('group1 msg',function(msg){
+  
+            if(msg.id==roles){
+                $('#messages').append(`
+                <li class="me">
+                    <div class="mename">${roles}:</div>
+                    <div class="content">${msg.content}</div>
                 </li>
-            `);
-            console.log(document.getElementById("messages"))
-            $('#messages').scrollTop( $('#messages').height() );
-      //      window.scrollTo(0, document.getElementById("messages").scrollHeight);
-        });
-        socket.on('chat login',function(msg){
-          //  $('#messages').append($('<li>').text(msg.msg));
+                `)
+            }else{
+                 $('#messages').append(`           
+                    <li class="jqr">
+                        <div class="name">${msg.id}:</div>
+                        <div class="content">${msg.content}</div>
+                    </li>
+                `);
+            }
+            //滚动到最底部
+          
+        //    $('#messages').scrollTop( $('#messages').height() );
+            var ele = document.getElementById('messages');
+            ele.scrollTop = ele.scrollHeight;
         })
     });
+
     </script>
 
   </body>

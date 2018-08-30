@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 5px; position: fixed; bottom: 0; width: 100%;height: 8%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { 
+          list-style-type: none;
+           margin: 0; padding: 0;   
+            position: absolute;
+            width: 100%;
+            top: 8%;
+            bottom: 8%;
+            background: white;
+            overflow: hidden;
+            /* overscroll-behavior-x: inherit; */
+            overflow: scroll;}
+      /* #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; } */
+      #messages li { padding: 5px 10px; }
+      .content{
+          display:inline-block !important; 
+          display:inline;
+          background: #eee;
+          padding: 4px
+         
+      }
+      .jqr{ width:100%;text-align: right}
+
+      @media screen and (min-width: 300px) {
+            body {
+                background-color:lightblue;
+            }
+            form input { border: 0; padding: 10px; width: 80%; margin-right: .5%; }
+            form button { width: 19%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+        }
+    </style>
+  </head>
+  <body>
+    <div>
+        <div >
+            <span style="font-size:20px">群聊:南淳59栋</span>
+            <span style="float:right" id="now_role"></span>
+        </div>
+        
+        <ul id="messages">
+        </ul>
+        <form action="">
+            <input id="m" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+    var group_id=2
+    var roles=prompt("输入你的ID","");
+    $("#now_role").text('当前用户:'+roles)
+    $(function () {
+        
+        var myMsg=""
+        var socket = io();
+        
+        $('form').submit(function(){
+            if(roles==""){
+                alert("请选择角色")
+            }else{
+            socket.emit('group'+group_id, {id:roles,content:$('#m').val()});
+              $('#m').val('');
+              return false;
+            }
+        });
+        socket.on('group2 msg',function(msg){
+  
+            console.log(msg,roles)
+            if(msg.id==roles){
+                $('#messages').append(`
+                <li class="me">
+                    <div class="mename">${roles}:</div>
+                    <div class="content">${msg.content}</div>
+                </li>
+                `)
+            }else{
+                 $('#messages').append(`           
+                    <li class="jqr">
+                        <div class="name">${msg.id}:</div>
+                        <div class="content">${msg.content}</div>
+                    </li>
+                `);
+            }
+            //滚动到最底部
+           // $('#messages').scrollTop( $('#messages').height() );
+           var ele = document.getElementById('messages');
+            ele.scrollTop = ele.scrollHeight;
+        })
+    });
+
+    </script>
+
+  </body>
+</html>
